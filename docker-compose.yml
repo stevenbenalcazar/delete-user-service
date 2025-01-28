@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  delete-user-service:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/deleteuserservice
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - CLOUD_AWS_CREDENTIALS_ACCESS-KEY=YOUR_AWS_ACCESS_KEY
+      - CLOUD_AWS_CREDENTIALS_SECRET-KEY=YOUR_AWS_SECRET_KEY
+      - CLOUD_AWS_REGION_STATIC=YOUR_AWS_REGION
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: deleteuserservice
+    ports:
+      - "5432:5432"
