@@ -1,5 +1,18 @@
-FROM openjdk:17-jdk-slim
-VOLUME /tmp
-ARG JAR_FILE=target/delete-user-service-0.0.1-SNAPSHOT.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+# Usar Node.js como base
+FROM node:18-alpine
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar archivos y dependencias
+COPY package.json package-lock.json ./
+RUN npm install
+
+# Copiar código fuente
+COPY . .
+
+# Exponer el puerto
+EXPOSE 3000
+
+# Comando de inicio
+CMD ["node", "src/index.js"]

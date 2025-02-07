@@ -1,8 +1,11 @@
 package com.example.deleteuserservice.controller;
 
+import com.example.deleteuserservice.model.User;
 import com.example.deleteuserservice.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -14,9 +17,19 @@ public class UserController {
         this.userService = userService;
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/{id}")  // ✅ Obtener usuario por ID
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        Optional<User> user = userService.findById(id);
+        return user.map(ResponseEntity::ok)
+                   .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")  // ✅ Eliminar usuario por ID
+    public ResponseEntity<Void> deleteUserById(@PathVariable Long id) {
+        if (userService.findById(id).isPresent()) {
+            userService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

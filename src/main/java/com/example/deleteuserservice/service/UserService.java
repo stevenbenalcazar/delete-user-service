@@ -1,7 +1,10 @@
 package com.example.deleteuserservice.service;
 
+import com.example.deleteuserservice.model.User;
 import com.example.deleteuserservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -12,12 +15,11 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            // Aquí puedes enviar la notificación a SNS
-        } else {
-            throw new IllegalArgumentException("User not found with id: " + id);
-        }
+    public Optional<User> findById(Long id) { // ✅ Agrega este método
+        return userRepository.findById(id);
+    }
+
+    public void deleteById(Long id) { // ✅ Agrega este método
+        userRepository.deleteById(id);
     }
 }

@@ -1,0 +1,38 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # Se ejecuta cuando se sube código a la rama main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t delete-user-service .
+          docker tag delete-user-service your-dockerhub-username/delete-user-service:latest
+          docker push your-dockerhub-username/delete-user-service:latest
+
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: 3.84.72.62
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull your-dockerhub-username/delete-user-service:latest
+            docker stop delete-user-service || true
+            docker rm delete-user-service || true
+            docker run -d -p 8080:8080 --name delete-user-service your-dockerhub-username/delete-user-service:latest
