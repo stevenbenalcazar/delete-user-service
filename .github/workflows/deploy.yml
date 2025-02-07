@@ -33,6 +33,6 @@ jobs:
             docker run -d --name delete-user-service -p 8080:8080 --network=taskify-network \
               -e SPRING_DATASOURCE_URL=jdbc:postgresql://52.91.20.54:5432/taskify_db \
               -e SPRING_DATASOURCE_USERNAME=taskify_user \
-              -e SPRING_DATASOURCE_PASSWORD=super_secure_password \
+              -e SPRING_DATASOURCE_PASSWORD='super_secure_password' \
               stevenbenalcazar/delete-user-service:latest
           EOF
