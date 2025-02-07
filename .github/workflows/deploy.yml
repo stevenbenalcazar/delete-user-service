@@ -1,38 +1,38 @@
-name: Deploy to AWS EC2
+name: Deploy Delete User Service
 
 on:
   push:
     branches:
-      - main  # Se ejecuta cuando se sube código a la rama main
+      - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout Repo
+      - name: 🛠️ Clonar repositorio
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: 🔨 Construir JAR con Maven
+        run: |
+          mvn clean package -DskipTests
 
-      - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build and Push Docker Image
+      - name: 🐳 Construir y subir imagen Docker
         run: |
           docker build -t delete-user-service .
-          docker tag delete-user-service your-dockerhub-username/delete-user-service:latest
-          docker push your-dockerhub-username/delete-user-service:latest
+          docker tag delete-user-service:latest stevenbenalcazar/delete-user-service:latest
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push stevenbenalcazar/delete-user-service:latest
 
-      - name: Deploy to AWS EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: 3.84.72.62
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            docker pull your-dockerhub-username/delete-user-service:latest
+      - name: 🚀 Desplegar en EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "micros.pem" ec2-user@3.84.72.62 << EOF
+            docker pull stevenbenalcazar/delete-user-service:latest
             docker stop delete-user-service || true
             docker rm delete-user-service || true
-            docker run -d -p 8080:8080 --name delete-user-service your-dockerhub-username/delete-user-service:latest
+            docker run -d --name delete-user-service -p 8080:8080 --network=taskify-network \
+              -e SPRING_DATASOURCE_URL=jdbc:postgresql://52.91.20.54:5432/taskify_db \
+              -e SPRING_DATASOURCE_USERNAME=admin \
+              -e SPRING_DATASOURCE_PASSWORD=yourpassword \
+              stevenbenalcazar/delete-user-service:latest
+          EOF

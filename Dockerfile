@@ -1,18 +1,11 @@
-# Usar Node.js como base
-FROM node:18-alpine
+# Imagen base
+FROM openjdk:17-jdk-slim
 
-# Crear directorio de trabajo
+# Definir directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos y dependencias
-COPY package.json package-lock.json ./
-RUN npm install
+# Copiar JAR generado por Maven
+COPY target/delete-user-service-0.0.1-SNAPSHOT.jar app.jar
 
-# Copiar código fuente
-COPY . .
-
-# Exponer el puerto
-EXPOSE 3000
-
-# Comando de inicio
-CMD ["node", "src/index.js"]
+# Comando para ejecutar el microservicio
+ENTRYPOINT ["java", "-jar", "/app.jar"]

@@ -1,12 +1,19 @@
 version: '3.8'
+
 services:
   delete-user-service:
-    image: delete-user-service
-    build: .
     container_name: delete-user-service
+    image: stevenbenalcazar/delete-user-service:latest
+    restart: always
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://52.91.20.54:5432/taskify_db
+      - SPRING_DATASOURCE_USERNAME=taskify_user
+      - SPRING_DATASOURCE_PASSWORD=super_secure_password
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://3.84.72.62:5432/taskify_db
-      - SPRING_DATASOURCE_USERNAME=taskify_user
-      - SPRING_DATASOURCE_PASSWORD=taskify_password
+    networks:
+      - taskify-network
+
+networks:
+  taskify-network:
+    driver: bridge
