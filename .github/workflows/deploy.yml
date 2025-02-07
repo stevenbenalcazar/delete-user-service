@@ -20,19 +20,19 @@ jobs:
       - name: 🐳 Construir y subir imagen Docker
         run: |
           docker build -t delete-user-service .
-          docker tag delete-user-service:latest stevenbenalcazar/delete-user-service:latest
+          docker tag delete-user-service:latest sabenalcazarm/delete-user-service:latest
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          docker push stevenbenalcazar/delete-user-service:latest
+          docker push sabenalcazarm/delete-user-service:latest
 
       - name: 🚀 Desplegar en EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i "micros.pem" ec2-user@3.84.72.62 << EOF
-            docker pull stevenbenalcazar/delete-user-service:latest
+            docker pull sabenalcazarm/delete-user-service:latest
             docker stop delete-user-service || true
             docker rm delete-user-service || true
             docker run -d --name delete-user-service -p 8080:8080 --network=taskify-network \
               -e SPRING_DATASOURCE_URL=jdbc:postgresql://52.91.20.54:5432/taskify_db \
               -e SPRING_DATASOURCE_USERNAME=taskify_user \
               -e SPRING_DATASOURCE_PASSWORD='super_secure_password' \
-              stevenbenalcazar/delete-user-service:latest
+              sabenalcazarm/delete-user-service:latest
           EOF
